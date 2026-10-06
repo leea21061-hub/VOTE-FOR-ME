@@ -41,10 +41,38 @@ footer{text-align:center;color:#777;font-size:12px;padding:25px}
 <div class="photo"><img src="nominee-9.jpg" alt="Brandy & Billy"></div>
 <div class="body"><small>09</small><h2>Brandy & Billy</h2><p>Creator Duo • Nominee #9</p>
 <b>NOMINEE</b></div></article></section>
-<section class="how"><h2>How to vote for Bailey</h2><ol><li>Find Bailey Johnson.</li><li>Tap <strong>VOTE FOR BAILEY</strong>.</li><li>You'll be taken to the existing voting/payment page.</li><li>Scan the QR code or copy the Bitcoin address, then review the payment details carefully before sending.</li></ol>
+<section class="how"><h2>How to vote for Bailey</h2><ol><li>Find Bailey Johnson.</li><li>Tap <strong>VOTE FOR BAILEY</strong>.</li><li>Choose your custom voting amount in US dollars.</li><li>Scan the QR code or copy the Bitcoin address, then review the payment details carefully before sending.</li></ol>
 <div id="vote" class="payment"><h2>Vote for Bailey</h2>
-<p>Send your Bitcoin vote payment to the address below.</p>
-<div class="btc">bc1qneec342a09w84uupp35p023s9gefp54st3few7</div><p class="qr-title">Scan this QR code to send BTC</p><img class="qr" src="bitcoin-qr.png" alt="Bitcoin QR code for the voting address">
-<p class="small">Only send Bitcoin (BTC) to this address. Verify the address in your wallet before confirming the transaction.</p>
-</div></section>
+<p>Choose your voting amount in US dollars. The page will calculate the approximate BTC amount using the current Bitcoin price.</p>
+<label for="usdAmount" style="display:block;margin-top:16px;color:#fff;font-weight:bold">Custom amount (USD)</label>
+<input id="usdAmount" type="number" min="1" step="0.01" inputmode="decimal" placeholder="e.g. 10.00" style="width:100%;padding:14px;margin-top:8px;border-radius:10px;border:1px solid #3a3a46;background:#09090d;color:#fff;font-size:16px">
+<div id="conversion" class="small" style="margin-top:10px">Enter an amount to see the estimated BTC amount.</div>
+<div class="btc">bc1qneec342a09w84uupp35p023s9gefp54st3few7</div>
+<p class="qr-title">Scan the QR code to send BTC</p><img id="paymentQr" class="qr" src="bitcoin-qr.png" alt="Bitcoin QR code for the voting address">
+<a id="payButton" href="#" style="opacity:.5;pointer-events:none">PAY CUSTOM AMOUNT IN BTC</a>
+<p class="small">The USD-to-BTC conversion is an estimate and can change with the Bitcoin price. Verify the address and amount in your wallet before confirming the transaction.</p>
+</div>
+<script>
+const address='bc1qneec342a09w84uupp35p023s9gefp54st3few7';
+const amountInput=document.getElementById('usdAmount');
+const conversion=document.getElementById('conversion');
+const qr=document.getElementById('paymentQr');
+const pay=document.getElementById('payButton');
+let btcUsd=null;
+async function getRate(){
+  conversion.textContent='Getting the current Bitcoin price…';
+  try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'); if(!r.ok) throw new Error(); const d=await r.json(); btcUsd=d.bitcoin.usd; update();}
+  catch(e){btcUsd=null; conversion.textContent='Live conversion is unavailable right now. You can still use the address above and enter the BTC amount in your wallet.';}
+}
+function update(){
+  const usd=parseFloat(amountInput.value);
+  if(!usd||usd<=0||!btcUsd){if(btcUsd) conversion.textContent='Enter an amount to see the estimated BTC amount.'; pay.style.opacity='.5'; pay.style.pointerEvents='none'; qr.src='bitcoin-qr.png'; return;}
+  const btc=usd/btcUsd; const btcText=btc.toFixed(8);
+  conversion.textContent=`Estimated BTC: ${btcText} BTC (1 BTC ≈ $${btcUsd.toLocaleString('en-US')})`;
+  const uri=`bitcoin:${address}?amount=${btcText}`;
+  pay.href=uri; pay.style.opacity='1'; pay.style.pointerEvents='auto';
+  qr.src='https://api.qrserver.com/v1/create-qr-code/?size=260x260&data='+encodeURIComponent(uri);
+}
+amountInput.addEventListener('input',update); getRate();
+</script></section>
 <footer>Creator Awards • Vote for your favorite nominee</footer></div></body></html>
