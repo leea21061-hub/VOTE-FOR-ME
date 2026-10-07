@@ -45,7 +45,7 @@ h1{font-size:clamp(38px,8vw,64px);margin:20px 0 10px}.lead{color:#bbb;line-heigh
 
 <p class="note">
 Vote totals are intended to come from confirmed payment records. This page does not invent or estimate votes.
-Until a payment-confirmation backend is connected, the displayed totals remain zero.
+Until a payment-confirmation backend is connected, the displayed totals remain zero and no nominee is shown as the leader.
 </p>
 <a class="back" href="index.html">← Back to voting page</a>
 </div>
@@ -71,8 +71,12 @@ async function loadResults(){
 
   const total = rows.reduce((s,r)=>s+r.votes,0);
   document.getElementById("totalVotes").textContent = total.toLocaleString();
-  document.getElementById("leader").textContent = rows[0]?.name || "—";
-  document.getElementById("leaderVotes").textContent = `${(rows[0]?.votes||0).toLocaleString()} votes`;
+  const leaderName = total > 0 ? rows[0].name : "No leader yet";
+  const leaderVoteText = total > 0
+    ? `${rows[0].votes.toLocaleString()} votes`
+    : "No verified votes yet";
+  document.getElementById("leader").textContent = leaderName;
+  document.getElementById("leaderVotes").textContent = leaderVoteText;
   document.getElementById("updated").textContent = data.updatedAt
     ? new Date(data.updatedAt).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})
     : "—";
